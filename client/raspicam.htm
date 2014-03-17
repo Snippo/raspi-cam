@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MJPEG-Streamer</title>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+</head>
+<script type="text/javascript">
+
+/* Copyright (C) 2007 Richard Atterer, richardÂ©atterer.net
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License, version 2. See the file
+   COPYING for details. */
+
+var IPandPort = "192.168.x.x:xxxx" // <- ***** You MUST Change This
+// If authentication is enabled you need to change this. Right now it does nothing.
+var user = "user";
+var pwd  = "password";
+
+var MyZoom = 20;	// Percentage to zoom when the image is clicked
+
+var imageNr = 0; // Serial number of current image
+var finished = new Array(); // References to img objects which have finished downloading
+var paused = false;
+
+// Width and height of the camera image
+var imgWidth = 840;
+var imgHeight = 480;
+
+var imgWidthPx = imgWidth+"px";
+var imgHeightPx = imgHeight+"px";
+var imgLeft = "50%";
+var imgMarginLeft = -imgWidth/2;
+var imgMarginLeftPx = imgMarginLeft+"px";
+
+function createImageLayer() {
+  var img = new Image();
+  img.style.position = "absolute";
+  img.style.width = imgWidthPx;
+  img.style.height = imgHeightPx;
+  img.style.left = imgLeft;
+  img.style.marginLeft = imgMarginLeftPx;
+  img.style.zIndex = -1;
+  img.onload = imageOnload;
+  img.src = 'http://'+IPandPort+'/'+'?action=snapshot?t=' + (++imageNr);
+  
+  // HTTP authentication in the url doesn't work in Internet Explorer (disabled for security reasons)
+  //img.src = 'http://'+user+':'+pwd+'@'+IPandPort+'/'+'?action=snapshot?t=' + (++imageNr);
+  
+  var webcam = document.getElementById("webcam");
+  webcam.insertBefore(img, webcam.firstChild);
+}
+
+// Two layers are always present (except at the very beginning), to avoid flicker
+function imageOnload() {
+  this.style.zIndex = imageNr; // Image finished, bring to front!
+  while (1 < finished.length) {
+    var del = finished.shift(); // Delete old image(s) from document
+    del.parentNode.removeChild(del);
+  }
+  finished.push(this);
+  if (!paused) createImageLayer();
+}
+
+// Clicking on the image will pause the stream, disabled because already used for zoom
+function imageOnclick() {
+  //paused = !paused;
+  if (!paused) createImageLayer();
+}
+
+</script>
+
+<body onload="createImageLayer();">
+<script type="text/javascript"> 
+        jQuery(document).ready( 
+            function(){ 
+                $('#Container').click( 
+                    function( event ){ 
+                        var scale = (MyZoom+100)/100; 
+						
+						imgWidth = imgWidth*scale;
+						imgHeight = imgHeight*scale;
+						imgWidthPx = imgWidth+"px";
+						imgHeightPx = imgHeight+"px";
+						imgLeft = "50%";
+						imgMarginLeft = -imgWidth/2;
+						imgMarginLeftPx = imgMarginLeft+"px";
+                    } 
+                );
+                $('#Container').dblclick( 
+                    function( event ){
+						imgWidth = 840;
+						imgHeight = 480;
+						imgWidthPx = imgWidth+"px";
+						imgHeightPx = imgHeight+"px";
+						imgLeft = "50%";
+						imgMarginLeft = -imgWidth/2;
+						imgMarginLeftPx = imgMarginLeft+"px";
+                    } 
+                );
+            } 
+        ); 
+</script>
+   <div id ="Container" align="center">
+	<div id="webcam"><img src="" align="center"/></div>
+</div>
+</body>
+</html>
