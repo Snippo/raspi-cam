@@ -14,7 +14,7 @@ filepath = "/tmp/stream"	# Directory where images are located
 def calcHist():
 	try:
 		files = sorted(os.listdir(filepath),key=lambda p: os.path.getctime(os.path.join(filepath, p)))
-		fpath = os.path.join(filepath, files[-2])
+		fpath = os.path.join(filepath, files[-4])
 		im = Image.open(fpath)
 		hist = im.histogram()
 
